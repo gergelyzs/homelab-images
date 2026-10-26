@@ -1,0 +1,46 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Europe/Budapest",
+  "labels": ["renovate"],
+  "commitBodyTable": true,
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 30,
+  "customManagers": [
+    {
+      "description": "Versions pinned in Dockerfile ARGs, marked with a '# renovate:' comment on the line above",
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)Dockerfile$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+ARG \\S+=(?<currentValue>\\S+)"
+      ]
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Workflow files can't be changed with GITHUB_TOKEN",
+      "matchManagers": ["github-actions"],
+      "enabled": false
+    },
+    {
+      "description": "DEFAULT: minor/patch/digest updates go in as one grouped commit on main (a rebuild follows automatically); majors open a PR for the AI review, which merges it when it finds no impact.",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+      "automerge": true,
+      "automergeType": "branch",
+      "ignoreTests": true,
+      "groupName": "minor and patch updates"
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major"]
+    },
+    {
+      "description": "Python minors (3.12 -> 3.13) remove things and can break pinned libraries in these images: reviewed one by one like majors",
+      "matchPackageNames": ["python"],
+      "matchUpdateTypes": ["minor"],
+      "automerge": false,
+      "groupName": null,
+      "addLabels": ["major"]
+    }
+  ]
+}

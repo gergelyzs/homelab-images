@@ -1,0 +1,86 @@
+# Builds images/<name>/ into ghcr.io/<owner>/<name> for amd64 + arm64 (the k3s
+# cluster has a Raspberry Pi node).
+#
+#   push to main  - builds only the images whose folder changed
+#   manual run    - builds one image, or all of them
+#
+# Tags: <YYYY.MM.DD>.<run number> (sortable, so Renovate in home-config/homeops
+# moves the deployments to it) and latest.
+name: Build images
+
+on:
+  push:
+    branches: [main]
+    paths: ["images/**"]
+  workflow_dispatch:
+    inputs:
+      image:
+        description: Image folder to build (empty = all)
+        required: false
+
+permissions: {}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      images: ${{ steps.list.outputs.images }}
+      version: ${{ steps.list.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Which images to build
+        id: list
+        env:
+          INPUT: ${{ inputs.image }}
+          BEFORE: ${{ github.event.before }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = workflow_dispatch ]; then
+            if [ -n "$INPUT" ]; then names="$INPUT"; else names=$(ls images); fi
+          elif [ -z "$BEFORE" ] || [ "$BEFORE" = 0000000000000000000000000000000000000000 ]; then
+            names=$(ls images)
+          else
+            names=$(git diff --name-only "$BEFORE" "$GITHUB_SHA" -- images | cut -d/ -f2 | sort -u)
+          fi
+          json=$(for n in $names; do [ -f "images/$n/Dockerfile" ] && echo "$n"; done | jq -R . | jq -sc .)
+          echo "images=$json" >> "$GITHUB_OUTPUT"
+          echo "version=$(date -u +%Y.%m.%d).${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "Building: $json"
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.images != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.plan.outputs.images) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: images/${{ matrix.image }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ needs.plan.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
