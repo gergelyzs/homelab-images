@@ -1,1 +1,1 @@
-beets[chroma]==2.13.1
+beets[chroma]==2.14.1
