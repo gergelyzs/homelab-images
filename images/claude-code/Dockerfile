@@ -2,7 +2,7 @@
 # subscription (CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`) instead of
 # API credits - the warranty scan classifier. Stdlib python only.
 # Moved here from gergelyzs/python-anthropic (claude-code.Dockerfile).
-FROM node:24-bookworm-slim
+FROM node:26-bookworm-slim
 
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
 ARG CLAUDE_CODE_VERSION=2.1.312
