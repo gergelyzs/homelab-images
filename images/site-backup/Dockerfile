@@ -13,7 +13,7 @@ RUN apk add --no-cache \
       bash ca-certificates coreutils curl findutils gzip jq lftp mariadb-client \
       openssh-client restic rsync tzdata \
       php84 php84-ctype php84-iconv php84-json php84-mbstring php84-mysqli php84-openssl \
-      php84-phar php84-tokenizer php84-zlib \
+      php84-curl php84-phar php84-tokenizer php84-zip php84-zlib \
  && ln -sf /usr/bin/php84 /usr/bin/php \
  && v="${WP_CLI_VERSION#v}" \
  && curl -fsSLo /usr/local/bin/wp "https://github.com/wp-cli/wp-cli/releases/download/v${v}/wp-cli-${v}.phar" \
