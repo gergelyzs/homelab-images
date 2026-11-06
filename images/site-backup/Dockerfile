@@ -6,7 +6,7 @@
 # staging), php + wp-cli (search-replace and options on the restored staging
 # site, always run with --skip-plugins --skip-themes). The scripts themselves
 # are mounted from a ConfigMap.
-FROM alpine:3.22
+FROM alpine:3.24
 
 # renovate: datasource=github-releases depName=wp-cli/wp-cli
 ARG WP_CLI_VERSION=v2.12.0
