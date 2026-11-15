@@ -41,6 +41,12 @@
       "automerge": false,
       "groupName": null,
       "addLabels": ["major"]
+    },
+    {
+      "description": "beets caps Requires-Python below 3.15: keep its base image on 3.14 until a beets release supports 3.15",
+      "matchFileNames": ["images/beets/Dockerfile"],
+      "matchPackageNames": ["python"],
+      "allowedVersions": "<3.15"
     }
   ]
 }

@@ -22,6 +22,14 @@ the old pattern of running `pip install` / `apt-get install` on every container 
 Tags: `<YYYY.MM.DD>.<run number>` and `latest`. Deployments pin the dated tag; Renovate in
 home-config/homeops moves them to each new build.
 
+## Tests
+
+Every image has `images/<name>/test.sh`, a quick smoke test (binaries start, packages import) that
+runs **inside the built image on both amd64 and arm64** before anything is pushed. A pull request
+that touches `images/` builds and tests the changed images without pushing; on `main` a failing test
+blocks the push, so a broken image never reaches the cluster through Renovate. A missing `test.sh`
+fails the build.
+
 ## Updates
 
 `.github/workflows/renovate.yml` + `renovate.json`: the same Renovate + AI-review setup as the two
@@ -32,5 +40,6 @@ triggers a rebuild.
 
 ## Adding an image
 
-Create `images/<name>/Dockerfile` (+ `requirements.txt` if it has Python deps), push to `main`.
+Create `images/<name>/Dockerfile` (+ `requirements.txt` if it has Python deps) and a `test.sh`
+that exercises what the services use, then push to `main`.
 Keep secrets and private code out: this repository and its packages are public.
