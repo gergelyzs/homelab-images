@@ -6,6 +6,9 @@
 FROM python:3.14-slim
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+# libatomic1: Playwright's bundled node driver needs it to even start, so `--with-deps` (which
+# runs through that driver) can't install it. This is what broke the old runtime-install CronJob.
+RUN apt-get update && apt-get install -y --no-install-recommends libatomic1 \
+ && pip install --no-cache-dir -r /tmp/requirements.txt \
  && playwright install --with-deps chromium \
  && rm -rf /var/lib/apt/lists/* /tmp/requirements.txt
