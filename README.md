@@ -11,6 +11,7 @@ the old pattern of running `pip install` / `apt-get install` on every container 
 | `ghcr.io/gergelyzs/python-nats` | python, `nats-py`, `httpx` | homeops: dav-writer, sync-bridge |
 | `ghcr.io/gergelyzs/beets` | python, `beets[chroma]`, ffmpeg, fpcalc, curl | home-config: beets import CronJob |
 | `ghcr.io/gergelyzs/claude-code` | node, python3, Claude Code CLI | home-config: warranty classifier |
+| `ghcr.io/gergelyzs/playwright` | python, `playwright`, Chromium + its system libraries | home-config: transmission scheduled-login CronJob |
 
 ## Builds
 
