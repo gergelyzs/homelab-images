@@ -3,7 +3,7 @@
 # mounted from a ConfigMap. The playwright pin in requirements.txt decides which Chromium build is
 # downloaded, so bump it (Renovate does) and the browser follows on the next image build.
 # python 3.14, not 3.15: the library pins here are not checked against 3.15 yet.
-FROM python:3.14-slim
+FROM python:3.15-slim
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 COPY requirements.txt /tmp/requirements.txt
 # libatomic1: Playwright's bundled node driver needs it to even start, so `--with-deps` (which
